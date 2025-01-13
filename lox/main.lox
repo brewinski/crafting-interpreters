@@ -1,0 +1,40 @@
+*{}()+-
+
+*{}{}+-
+
+
+{}!="testing 1234"
+
+12132
+1123.123
+123.3123312
+
+myIdentifier = 1234
+
+== 
+<= 
+>= 
+!= 
+!
+<
+>
+=
+
+"this is an unterminated string literal
+
+_underscoreIdentifier = 1234
+
+and
+or
+true
+false
+else
+return
+class
+super
+nil
+for
+fun
+print
+this
+%#$$^##
