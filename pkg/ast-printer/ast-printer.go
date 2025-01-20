@@ -13,9 +13,11 @@ type AstPrinter struct {
 func (ap *AstPrinter) VisitBinaryExpr(binary expr.Binary[string]) string {
 	return ap.parenthesize(binary.Operator.Lexeme, binary.Left, binary.Right)
 }
+
 func (ap *AstPrinter) VisitGroupingExpr(grouping expr.Grouping[string]) string {
 	return ap.parenthesize("group", grouping.Expression)
 }
+
 func (ap *AstPrinter) VisitLiteralExpr(literal expr.Literal[string]) string {
 	if literal.Value == nil {
 		return "nil"
@@ -23,6 +25,7 @@ func (ap *AstPrinter) VisitLiteralExpr(literal expr.Literal[string]) string {
 
 	return string(fmt.Sprintf("%v", literal.Value))
 }
+
 func (ap *AstPrinter) VisitUnaryExpr(unary expr.Unary[string]) string {
 	return ap.parenthesize(unary.Operator.Lexeme, unary.Right)
 }

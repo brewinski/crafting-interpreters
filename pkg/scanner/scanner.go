@@ -1,4 +1,4 @@
-package main
+package scanner
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func NewScanner(source string) Scanner {
 	}
 }
 
-func (s *Scanner) scanTokens() []token.Token {
+func (s *Scanner) ScanTokens() []token.Token {
 	for !s.isAtEnd() {
 		s.start = s.current
 		s.scanToken()

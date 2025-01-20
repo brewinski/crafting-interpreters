@@ -47,7 +47,7 @@ func defineAst(outDir string, baseName string, types []string) error {
 	writer := bufio.NewWriter(file)
 
 	_, err = fmt.Fprintf(writer, "package %s\n\nimport \"github.com/brewinski/crafting-interpreters/pkg/token\"\n", strings.ToLower(baseName))
-	_, err = fmt.Fprintln(writer, "")
+
 	_, err = fmt.Fprint(writer, "\n\n")
 
 	_, err = fmt.Fprintf(writer, "type %s[R any] interface {\n", baseName)
@@ -102,7 +102,7 @@ func defineStructure(w *bufio.Writer, name, structName, fields string) {
 
 	fmt.Fprintf(w, "}\n\n")
 
-	fmt.Fprintf(w, "func New%s[R any](%s) %s[R] { \n", structName, fields, structName)
+	fmt.Fprintf(w, "func New%s[R any](%s) %s[R] {\n", structName, fields, structName)
 	fmt.Fprintf(w, "\treturn %s[R]{\n", structName)
 
 	for _, f := range fieldsArr {

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/brewinski/crafting-interpreters/pkg/scanner"
 )
 
 func main() {
@@ -55,9 +57,9 @@ func runPrompt(reader io.Reader, writer io.Writer) {
 }
 
 func run(sourceFile string) error {
-	scanner := NewScanner(sourceFile)
+	scanner := scanner.NewScanner(sourceFile)
 
-	for _, token := range scanner.scanTokens() {
+	for _, token := range scanner.ScanTokens() {
 		fmt.Printf("[RUN] token: '%s', line: '%d', lexeme: '%s', literal: '%s' \n", token.TokenType.String(), token.Line, token.Lexeme, token.Literal)
 	}
 
