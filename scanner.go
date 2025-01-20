@@ -3,32 +3,14 @@ package main
 import (
 	"fmt"
 	"unicode"
-)
 
-var (
-	Keywords = map[string]TokenType{
-		"and":    AND,
-		"class":  CLASS,
-		"else":   ELSE,
-		"false":  FALSE,
-		"for":    FOR,
-		"fun":    FUN,
-		"if":     IF,
-		"nil":    NIL,
-		"or":     OR,
-		"print":  PRINT,
-		"return": RETURN,
-		"super":  SUPER,
-		"this":   THIS,
-		"true":   TRUE,
-		"var":    VAR,
-		"while":  WHILE,
-	}
+	interr "github.com/brewinski/crafting-interpreters/pkg/error"
+	"github.com/brewinski/crafting-interpreters/pkg/token"
 )
 
 type Scanner struct {
 	source  string
-	tokens  []Token
+	tokens  []token.Token
 	start   int
 	current int
 	line    int
@@ -38,7 +20,7 @@ type Scanner struct {
 func NewScanner(source string) Scanner {
 	return Scanner{
 		source:  source,
-		tokens:  []Token{},
+		tokens:  []token.Token{},
 		start:   0,
 		current: 0,
 		line:    1,
@@ -46,13 +28,13 @@ func NewScanner(source string) Scanner {
 	}
 }
 
-func (s *Scanner) scanTokens() []Token {
+func (s *Scanner) scanTokens() []token.Token {
 	for !s.isAtEnd() {
 		s.start = s.current
 		s.scanToken()
 	}
 
-	s.tokens = append(s.tokens, NewToken(EOF, "", s.line, ""))
+	s.tokens = append(s.tokens, token.NewToken(token.EOF, "", s.line, ""))
 
 	return s.tokens
 }
@@ -65,50 +47,50 @@ func (s *Scanner) scanToken() {
 	c := s.advance()
 	switch c {
 	case '(':
-		s.addToken(LEFT_PAREN, "")
+		s.addToken(token.LEFT_PAREN, "")
 	case ')':
-		s.addToken(RIGHT_PAREN, "")
+		s.addToken(token.RIGHT_PAREN, "")
 	case '{':
-		s.addToken(LEFT_BRACE, "")
+		s.addToken(token.LEFT_BRACE, "")
 	case '}':
-		s.addToken(RIGHT_BRACE, "")
+		s.addToken(token.RIGHT_BRACE, "")
 	case ',':
-		s.addToken(COMMA, "")
+		s.addToken(token.COMMA, "")
 	case '.':
-		s.addToken(DOT, "")
+		s.addToken(token.DOT, "")
 	case '-':
-		s.addToken(MINUS, "")
+		s.addToken(token.MINUS, "")
 	case '+':
-		s.addToken(PLUS, "")
+		s.addToken(token.PLUS, "")
 	case ';':
-		s.addToken(SEMICOLON, "")
+		s.addToken(token.SEMICOLON, "")
 	case '*':
-		s.addToken(STAR, "")
+		s.addToken(token.STAR, "")
 	case '!':
 		if s.match('=') {
-			s.addToken(BANG_EQUAL, "")
+			s.addToken(token.BANG_EQUAL, "")
 			break
 		}
-		s.addToken(BANG, "")
+		s.addToken(token.BANG, "")
 	case '=':
 		if s.match('=') {
-			s.addToken(EQUAL_EQUAL, "")
+			s.addToken(token.EQUAL_EQUAL, "")
 			break
 		}
-		s.addToken(EQUAL, "")
+		s.addToken(token.EQUAL, "")
 	case '>':
 		if s.match('=') {
-			s.addToken(GREATER_EQUAL, "")
+			s.addToken(token.GREATER_EQUAL, "")
 			break
 		}
-		s.addToken(GREATER, "")
+		s.addToken(token.GREATER, "")
 	case '<':
 		if s.match('=') {
-			s.addToken(LESS_EQUAL, "")
+			s.addToken(token.LESS_EQUAL, "")
 			break
 		}
 
-		s.addToken(LESS, "")
+		s.addToken(token.LESS, "")
 	case '/':
 		if s.match('/') {
 			// a comment does until the end of the line.
@@ -116,7 +98,7 @@ func (s *Scanner) scanToken() {
 				s.advance()
 			}
 		}
-		s.addToken(SLASH, "")
+		s.addToken(token.SLASH, "")
 	case ' ', '\t', '\r':
 		break
 	case '\n':
@@ -133,14 +115,14 @@ func (s *Scanner) scanToken() {
 			s.identifier()
 			break
 		}
-		onError(s.line, s.col, fmt.Sprintf("Unexpected character: %s", string(c)))
+		interr.Error(s.line, s.col, fmt.Sprintf("Unexpected character: %s", string(c)))
 	}
 }
 
-func (s *Scanner) addToken(tokenType TokenType, literal any) {
+func (s *Scanner) addToken(tokenType token.TokenType, literal any) {
 	text := s.source[s.start:s.current]
 
-	s.tokens = append(s.tokens, NewToken(tokenType, text, s.line, literal))
+	s.tokens = append(s.tokens, token.NewToken(tokenType, text, s.line, literal))
 }
 
 func (s *Scanner) advance() byte {
@@ -183,7 +165,7 @@ func (s *Scanner) string() {
 	}
 
 	if s.isAtEnd() {
-		onError(s.line, s.col, "Unterminated string.")
+		interr.Error(s.line, s.col, "Unterminated string.")
 		return
 	}
 
@@ -192,7 +174,7 @@ func (s *Scanner) string() {
 	// get the string excluding the leading and trailing "
 	stringValue := s.source[s.start+1 : s.current-1]
 
-	s.addToken(STRING, stringValue)
+	s.addToken(token.STRING, stringValue)
 }
 
 func (s *Scanner) number() {
@@ -211,7 +193,7 @@ func (s *Scanner) number() {
 	// get the string excluding the leading and trailing "
 	stringValue := s.source[s.start:s.current]
 
-	s.addToken(NUMBER, stringValue)
+	s.addToken(token.NUMBER, stringValue)
 }
 
 func (s *Scanner) peekNext() byte {
@@ -229,9 +211,9 @@ func (s *Scanner) identifier() {
 
 	text := s.source[s.start:s.current]
 
-	tokenType, ok := Keywords[text]
+	tokenType, ok := token.Keywords[text]
 	if !ok {
-		tokenType = IDENTIFIER
+		tokenType = token.IDENTIFIER
 	}
 
 	s.addToken(tokenType, "")

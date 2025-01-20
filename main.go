@@ -63,11 +63,3 @@ func run(sourceFile string) error {
 
 	return nil
 }
-
-func onError(line, col int, message string) {
-	report(line, col, "", message)
-}
-
-func report(line, col int, where, message string) {
-	fmt.Printf("[line: %d:%d] Error %s: %s\n", line, col, where, message)
-}
